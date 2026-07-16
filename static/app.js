@@ -669,13 +669,23 @@ document.getElementById("toggleSettings").addEventListener("click", () => {
 });
 
 const projectNameInput = document.getElementById("projectName");
+const companyNameInput = document.getElementById("companyName");
 const workTitleInput = document.getElementById("workTitle");
+
+function updateHdrProjectCompany() {
+  const t = [projectNameInput.value, companyNameInput.value].filter(Boolean).join(" · ");
+  const el = document.getElementById("hdrProjectCompany");
+  el.textContent = t;
+  el.style.display = t ? "" : "none";
+}
 
 async function loadSettings() {
   const res = await fetch("/api/settings");
   const data = await res.json();
   projectNameInput.value = data.project_name || "";
+  companyNameInput.value = data.company_name || "";
   workTitleInput.value = data.work_title || "";
+  updateHdrProjectCompany();
 }
 
 async function saveSettings() {
@@ -684,12 +694,15 @@ async function saveSettings() {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       project_name: projectNameInput.value,
+      company_name: companyNameInput.value,
       work_title: workTitleInput.value,
     }),
   });
+  updateHdrProjectCompany();
 }
 
 projectNameInput.addEventListener("blur", saveSettings);
+companyNameInput.addEventListener("blur", saveSettings);
 workTitleInput.addEventListener("change", saveSettings);
 
 function buildFormData(format) {
@@ -699,6 +712,7 @@ function buildFormData(format) {
     "settings",
     JSON.stringify({
       project_name: projectNameInput.value,
+      company_name: companyNameInput.value,
       work_title: workTitleInput.value,
     })
   );

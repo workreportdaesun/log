@@ -11,6 +11,7 @@
 <body>
 <div class="wrap">
   <h1><img src="/static/icon.png" alt="" class="app-icon">사진대지 생성기</h1>
+  <div class="brand-banner" id="hdrProjectCompany" style="display:none;"></div>
   <div class="brand-banner">📱 작업사진 앱·갤러리와 동일한 구분·분류 체계를 사용합니다</div>
 
   <section class="panel" id="settingsPanel">
@@ -18,6 +19,9 @@
     <div id="settingsBody">
       <label>공사명
         <input type="text" id="projectName" placeholder="예) 샤힌 에틸렌시설 건설공사 PKG1 계장공사 (3공구)">
+      </label>
+      <label>회사명
+        <input type="text" id="companyName" placeholder="예) OO건설">
       </label>
       <label>사진관리 구분 (제목에 반영: 사 진 대 지 (구분), 갤러리 불러오기 기본 필터로도 사용)
         <select id="workTitle" class="cloud-layout-select">

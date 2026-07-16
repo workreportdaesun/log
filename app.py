@@ -29,7 +29,7 @@ def load_settings():
     if os.path.exists(SETTINGS_PATH):
         with open(SETTINGS_PATH, "r", encoding="utf-8") as f:
             return json.load(f)
-    return {"project_name": "", "work_title": ""}
+    return {"project_name": "", "company_name": "", "work_title": ""}
 
 
 def save_settings(data):
@@ -72,6 +72,7 @@ def post_settings():
     data = request.get_json(force=True)
     settings = {
         "project_name": (data.get("project_name") or "").strip(),
+        "company_name": (data.get("company_name") or "").strip(),
         "work_title": (data.get("work_title") or "").strip(),
     }
     save_settings(settings)
