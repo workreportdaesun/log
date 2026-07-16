@@ -240,14 +240,19 @@ def build_workbook(pages, settings):
                    레이아웃 2는 2개: top, bottom 순서)
           ],
         }
-    settings: {"project_name": str, "work_title": str}
+    settings: {"project_name": str, "company_name": str, "work_title": str}
     반환: openpyxl.Workbook (모든 페이지가 시트 하나에 순서대로 쌓인 상태. 원본 템플릿 시트는 삭제됨)
     """
     wb = load_workbook(TEMPLATE_PATH)
     src_sheets = {SHEET_4: wb[SHEET_4], SHEET_2: wb[SHEET_2]}
 
     title = f"사 진 대 지 ({settings.get('work_title', '').strip()})" if settings.get("work_title") else None
-    project_line = f"공사명 : {settings.get('project_name', '').strip()}" if settings.get("project_name") else None
+    project_bits = []
+    if settings.get("project_name"):
+        project_bits.append(f"공사명 : {settings['project_name'].strip()}")
+    if settings.get("company_name"):
+        project_bits.append(f"회사명 : {settings['company_name'].strip()}")
+    project_line = "    ".join(project_bits) if project_bits else None
 
     dest_ws = wb.create_sheet("사진대지")
     dest_ws.sheet_format.defaultColWidth = DEFAULT_COL_WIDTH
