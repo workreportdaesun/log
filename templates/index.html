@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>사진대지 생성기</title>
+<link rel="icon" type="image/png" href="/static/icon.png">
+<link rel="stylesheet" href="/static/style.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+</head>
+<body>
+<div class="wrap">
+  <h1><img src="/static/icon.png" alt="" class="app-icon">사진대지 생성기</h1>
+  <div class="brand-banner">📱 작업사진 앱·갤러리와 동일한 구분·분류 체계를 사용합니다</div>
+
+  <section class="panel" id="settingsPanel">
+    <h2>설정 <button type="button" id="toggleSettings" class="link-btn">접기/펼치기</button></h2>
+    <div id="settingsBody">
+      <label>공사명
+        <input type="text" id="projectName" placeholder="예) 샤힌 에틸렌시설 건설공사 PKG1 계장공사 (3공구)">
+      </label>
+      <label>사진관리 구분 (제목에 반영: 사 진 대 지 (구분), 갤러리 불러오기 기본 필터로도 사용)
+        <select id="workTitle" class="cloud-layout-select">
+          <option value="">선택 안 함</option>
+          <option value="시공">시공</option>
+          <option value="품질">품질</option>
+          <option value="자재">자재</option>
+          <option value="안전">안전</option>
+          <option value="화기/유도">화기/유도</option>
+        </select>
+      </label>
+      <p class="hint">설정 값은 자동으로 저장되어 다음에 열 때도 유지됩니다. work-shoot/work-gallery와 동일한 구분을 사용합니다.</p>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h2>갤러리(Supabase)에서 불러오기</h2>
+    <p class="hint">work-gallery에 업로드된 사진을 목록에서 선택하면, 기기번호/작업구역/작업내용/날짜가 자동으로 채워진 상태로 페이지가 생성됩니다. 위 설정에서 "사진관리 구분"을 선택해두면 갤러리 불러오기가 해당 구분으로 기본 필터된 채로 열립니다.</p>
+    <select id="cloudLayout" class="cloud-layout-select">
+      <option value="4" selected>사진 4장 (2x2)</option>
+      <option value="2">사진 2장 (세로)</option>
+    </select>
+    <button type="button" id="openCloudPicker" class="primary-btn">☁️ 갤러리에서 불러오기</button>
+    <button type="button" id="openLocalPicker" class="primary-btn">💻 PC에서 선택 불러오기</button>
+    <button type="button" id="openLocalIndividualPicker" class="primary-btn">📄 개별 불러오기</button>
+    <input type="file" id="localPickerInput" accept="image/*" multiple hidden>
+    <input type="file" id="localIndividualPickerInput" accept="image/*" multiple hidden>
+    <p class="hint">"PC에서 선택 불러오기"는 갤러리 불러오기처럼 선택한 사진들을 위에서 고른 레이아웃(2장/4장)대로 묶어 페이지를 만듭니다. "개별 불러오기"는 선택한 사진 각각을 별도 페이지로 만들어, 서로 관련 없는 사진을 한 장씩 넣을 때 편리합니다.</p>
+  </section>
+
+  <section class="panel folder-panel" id="folderPanel">
+    <h2>💾 저장 폴더</h2>
+    <div class="folder-row-top">
+      <span id="folderStatus" class="folder-status-text">저장 폴더가 지정되지 않았습니다.</span>
+      <button type="button" id="pickFolderBtn" class="primary-btn">폴더 지정</button>
+    </div>
+    <p class="hint">다운로드한 파일이 저장될 폴더입니다. 한 번 지정하면 다음부터 다시 묻지 않고 이 폴더에 바로 저장됩니다.</p>
+  </section>
+
+  <div class="section-divider"><span>개별 삽입</span></div>
+
+  <section class="panel panel-individual">
+    <h2>개별 삽입 (페이지 목록)</h2>
+    <p class="hint">위 갤러리 불러오기로 만들어진 페이지를 여기서 개별 수정하거나, 페이지를 직접 추가해 사진을 한 장씩 따로 넣을 수 있습니다. 파일명이나 사진의 EXIF 설명 정보로 의미 있는 내용을 추정할 수 있으면 "작업내용" 필드에 자동으로 채워집니다.</p>
+    <div id="pages"></div>
+    <button type="button" id="addPage" class="primary-btn">+ 페이지 추가</button>
+  </section>
+
+  <section class="panel actions">
+    <div class="actions-row">
+      <button type="button" id="previewBtn" class="primary-btn">미리보기</button>
+      <button type="button" id="downloadXlsx" class="primary-btn">엑셀 다운로드</button>
+      <button type="button" id="downloadPdf" class="primary-btn">PDF 다운로드</button>
+      <span id="status"></span>
+    </div>
+  </section>
+</div>
+
+<template id="pageTemplate">
+  <div class="page-card">
+    <div class="page-card-header">
+      <b class="page-title"></b>
+      <button type="button" class="remove-page link-btn">페이지 삭제</button>
+    </div>
+    <div class="blocks"></div>
+  </div>
+</template>
+
+<template id="setCardTemplate">
+  <div class="block">
+    <h3 class="set-title"></h3>
+    <div class="fields">
+      <label class="lbl-dwg">기기번호 <input type="text" data-field="dwg"></label>
+      <label class="lbl-location">작업구역 <input type="text" data-field="location"></label>
+      <label class="lbl-content">작업내용 <input type="text" data-field="content"></label>
+      <label class="lbl-date">날짜 <input type="text" data-field="date"></label>
+    </div>
+    <div class="photos"></div>
+  </div>
+</template>
+
+<div id="cloudModal" class="modal-overlay" style="display:none;">
+  <div class="modal">
+    <div class="modal-header">
+      <h2>갤러리에서 불러오기</h2>
+      <button type="button" id="closeCloudPicker" class="link-btn">닫기</button>
+    </div>
+    <div id="cloudMenuNotice" class="hint"></div>
+    <label class="modal-filter-select">작업구분
+      <select id="cloudWorkTypeFilter">
+        <option value="">전체</option>
+      </select>
+    </label>
+    <label class="modal-filter-select" id="cloudPhaseFilterWrap" style="display:none;">세부단계
+      <select id="cloudPhaseFilter">
+        <option value="">전체</option>
+      </select>
+    </label>
+    <label class="modal-filter-select">최하위 폴더
+      <select id="cloudCatFilter">
+        <option value="">전체</option>
+      </select>
+    </label>
+    <label class="modal-filter-select">날짜
+      <select id="cloudDateFilter">
+        <option value="">전체</option>
+      </select>
+    </label>
+    <input type="text" id="cloudSearch" placeholder="기기번호/작업구역/작업내용 검색" class="modal-search">
+    <div id="cloudStatus" class="hint"></div>
+    <div id="cloudList" class="cloud-list"></div>
+    <div class="modal-footer">
+      <div class="modal-footer-left">
+        <button type="button" id="cloudSelectAll" class="link-btn">전체 선택</button>
+        <span id="cloudSelectedCount" class="hint"></span>
+      </div>
+      <button type="button" id="importCloudSelected" class="primary-btn">선택한 사진 불러오기</button>
+    </div>
+  </div>
+</div>
+
+<script src="/static/app.js"></script>
+</body>
+</html>
