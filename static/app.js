@@ -217,8 +217,8 @@ document.getElementById("addPage").addEventListener("click", () => {
 
 // ── work-gallery(Supabase) 연동 ──────────────────────
 // work-gallery/index.html과 동일한 프로젝트의 Supabase publishable key (공개 anon key, 비밀값 아님)
-const SUPABASE_URL = "https://dteljgmdbfyxubtpogcj.supabase.co";
-const SUPABASE_KEY = "sb_publishable_VC2GcwpxDg_zVbFgOnpfzg__sictyqc";
+const SUPABASE_URL = "https://feymoykefzfwucbrqoja.supabase.co";
+const SUPABASE_KEY = "sb_publishable_ANT6G7_ka3IPHRk_4vLtBg_7G9NWW7i";
 let sbClient = null;
 try {
   sbClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
