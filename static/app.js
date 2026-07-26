@@ -470,7 +470,7 @@ async function loadCloudRecords() {
   cloudStatus.textContent = "불러오는 중...";
   try {
     const { data, error } = await sbClient
-      .from("work_photos")
+      .from("workreportdaesun-gallery")
       .select("*")
       .order("date", { ascending: false })
       .limit(5000);
