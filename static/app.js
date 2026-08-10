@@ -304,10 +304,11 @@ function populateSelectOptions(selectEl, values) {
 }
 
 // work-gallery(work-gallery/index.html WT_LABELS_BY_MENU)와 동일한 메뉴별 작업구분 단계.
-// 시공/품질은 신규가 "진행중/완료", 수정이 "변경전/변경후"로 세분화되고,
+// 시공/품질은 신규가 "진행/완료", 수정이 "변경전/변경후"로 세분화되고,
 // 자재/안전/화기유도는 하위 단계 없이 도급-사급 등 값 자체가 구분이다.
+// "진행중"은 gallery만 쓰던 옛 표기 — 작업일보 기준인 "진행"으로 통일했다(2026-08-10).
 const WT_LABELS_BY_MENU = {
-  "시공": { new: "신규", mod: "수정", newPhases: ["진행중", "완료"], modPhases: ["변경전", "변경후"] },
+  "시공": { new: "신규", mod: "수정", newPhases: ["진행", "완료"], modPhases: ["변경전", "변경후"] },
   "품질": { new: "신규", mod: "수정", modPhases: ["변경전", "변경후"] },
   "자재": { new: "도급", mod: "사급" },
   "안전": { new: "현장안전점검", mod: "안전용품" },
@@ -315,11 +316,12 @@ const WT_LABELS_BY_MENU = {
 };
 
 // work-gallery(work-gallery/index.html workTypeFolderName)와 동일한 폴더 묶음 규칙.
-// 시공/품질은 "진행중/완료"→신규, "변경전/변경후/수정-작업전/수정-작업후"(구버전 표기 포함)→수정으로 묶이고,
+// 시공/품질은 "진행/완료"→신규, "변경전/변경후/수정-작업전/수정-작업후"(구버전 표기 포함)→수정으로 묶이고,
 // 그 외 값(자재의 도급/사급 등, 혹은 이미 "신규"/"수정" 그 자체로 저장된 값)은 원래 값을 폴더명으로 그대로 쓴다.
+// "진행중"은 이미 그렇게 저장된 옛 사진·폴더를 위해 읽기 쪽에서만 계속 받아준다.
 function workTypeFolderName(wt) {
   if (wt === "변경전" || wt === "변경후" || wt === "수정-작업전" || wt === "수정-작업후") return "수정";
-  if (wt === "진행중" || wt === "완료") return "신규";
+  if (wt === "진행" || wt === "진행중" || wt === "완료") return "신규";
   return wt || "기타";
 }
 
