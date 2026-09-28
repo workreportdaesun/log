@@ -217,8 +217,13 @@ document.getElementById("addPage").addEventListener("click", () => {
 
 // ── work-gallery(Supabase) 연동 ──────────────────────
 // work-gallery/index.html과 동일한 프로젝트의 Supabase publishable key (공개 anon key, 비밀값 아님)
-const SUPABASE_URL = "https://feymoykefzfwucbrqoja.supabase.co";
-const SUPABASE_KEY = "sb_publishable_ANT6G7_ka3IPHRk_4vLtBg_7G9NWW7i";
+// 2026-08-22: 다른 현장/회사가 각자 다른 Supabase에 연결해 쓸 수 있도록, site-setup.html에서
+// 저장한 값이 있으면 그걸 우선 쓰고, 없으면 기본(대선이엔씨) 프로젝트를 쓴다.
+// 주의: 이 앱은 localhost Flask 서버로 열리는 별도 오리진이라, report/gallery 등이
+// GitHub Pages 오리진에 저장한 localStorage 값을 공유받지 못한다 — 실제로 다른 현장에서
+// 쓰려면 이 브라우저(오리진)에서 site_supabase_url/site_supabase_key를 직접 설정해야 한다.
+const SUPABASE_URL = localStorage.getItem('site_supabase_url') || "https://feymoykefzfwucbrqoja.supabase.co";
+const SUPABASE_KEY = localStorage.getItem('site_supabase_key') || "sb_publishable_ANT6G7_ka3IPHRk_4vLtBg_7G9NWW7i";
 let sbClient = null;
 try {
   sbClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
